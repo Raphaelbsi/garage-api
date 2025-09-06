@@ -1,0 +1,18 @@
+<mat-toolbar color="primary">
+  <mat-toolbar-row>
+    <span>Sistema de Gerenciamento de Veiculos</span>
+    <span class="spacer"></span>
+    <button mat-button routerLink="/vehicles">
+      <mat-icon>directions_car</mat-icon>
+      Veiculos
+    </button>
+    <button mat-raised-button color="accent" routerLink="/vehicles/new">
+      <mat-icon>add</mat-icon>
+      Novo Veiculo
+    </button>
+  </mat-toolbar-row>
+</mat-toolbar>
+
+<main class="container">
+  <router-outlet></router-outlet>
+</main>

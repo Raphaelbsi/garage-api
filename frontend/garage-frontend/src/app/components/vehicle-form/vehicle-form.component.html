@@ -1,0 +1,207 @@
+<div class="header">
+  <h1>{{ isEditMode ? 'Editar Veículo' : 'Novo Veículo' }}</h1>
+  <button mat-button color="primary" routerLink="/vehicles">
+    <mat-icon>arrow_back</mat-icon>
+    Voltar
+  </button>
+</div>
+
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>
+      {{ isEditMode ? 'Editar dados do veículo' : 'Preencha os dados do veículo' }}
+    </mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+    <form [formGroup]="vehicleForm" (ngSubmit)="onSubmit()" class="vehicle-form">
+
+      <!-- Tipo do Veículo -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Tipo do Veículo</mat-label>
+        <mat-select formControlName="tipo" required>
+          <mat-option value="CARRO">
+            <mat-icon>directions_car</mat-icon>
+            Carro
+          </mat-option>
+          <mat-option value="MOTO">
+            <mat-icon>two_wheeler</mat-icon>
+            Moto
+          </mat-option>
+          <mat-option value="CAMINHAO">
+            <mat-icon>local_shipping</mat-icon>
+            Caminhão
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="vehicleForm.get('tipo')?.errors?.['required']">
+          O tipo é obrigatório
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Placa -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Placa</mat-label>
+        <input matInput formControlName="placa" placeholder="ABC-1234" maxlength="8" (input)="onPlacaChange($event)"
+          required>
+        <mat-hint>Formato: ABC-1234 ou ABC1D23</mat-hint>
+        <mat-error *ngIf="vehicleForm.get('placa')?.errors?.['required']">
+          A placa é obrigatória
+        </mat-error>
+        <mat-error *ngIf="vehicleForm.get('placa')?.errors?.['pattern']">
+          Formato inválido. Use ABC-1234 ou ABC1D23
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Marca e Modelo na mesma linha -->
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Marca</mat-label>
+          <input matInput formControlName="marca" placeholder="Ex: Toyota, Honda, Volkswagen" required>
+          <mat-error *ngIf="vehicleForm.get('marca')?.errors?.['required']">
+            A marca é obrigatória
+          </mat-error>
+          <mat-error *ngIf="vehicleForm.get('marca')?.errors?.['minlength']">
+            A marca deve ter pelo menos 2 caracteres
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Modelo</mat-label>
+          <input matInput formControlName="modelo" placeholder="Ex: Corolla, Civic, Gol" required>
+          <mat-error *ngIf="vehicleForm.get('modelo')?.errors?.['required']">
+            O modelo é obrigatório
+          </mat-error>
+          <mat-error *ngIf="vehicleForm.get('modelo')?.errors?.['minlength']">
+            O modelo deve ter pelo menos 2 caracteres
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Ano e Cor na mesma linha -->
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Ano</mat-label>
+          <input matInput type="number" formControlName="ano" [min]="minYear" [max]="maxYear" placeholder="2020"
+            required>
+          <mat-hint>Entre {{ minYear }} e {{ maxYear }}</mat-hint>
+          <mat-error *ngIf="vehicleForm.get('ano')?.errors?.['required']">
+            O ano é obrigatório
+          </mat-error>
+          <mat-error *ngIf="vehicleForm.get('ano')?.errors?.['min']">
+            Ano mínimo: {{ minYear }}
+          </mat-error>
+          <mat-error *ngIf="vehicleForm.get('ano')?.errors?.['max']">
+            Ano máximo: {{ maxYear }}
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Cor</mat-label>
+          <mat-select formControlName="cor" required>
+            <mat-option *ngFor="let color of availableColors" [value]="color.value">
+              <span class="color-option">
+                <span class="color-circle" [style.background-color]="color.hex"></span>
+                {{ color.label }}
+              </span>
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="vehicleForm.get('cor')?.errors?.['required']">
+            A cor é obrigatória
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Chassi e Renavam na mesma linha -->
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Chassi</mat-label>
+          <input matInput formControlName="chassi" placeholder="11-17 caracteres alfanuméricos" maxlength="17" required>
+          <mat-hint>{{ vehicleForm.get('chassi')?.value?.length || 0 }}/17 caracteres</mat-hint>
+          <mat-error *ngIf="vehicleForm.get('chassi')?.errors?.['required']">
+            O chassi é obrigatório
+          </mat-error>
+          <mat-error
+            *ngIf="vehicleForm.get('chassi')?.errors?.['minlength'] || vehicleForm.get('chassi')?.errors?.['maxlength']">
+            O chassi deve ter entre 11 e 17 caracteres
+          </mat-error>
+          <mat-error *ngIf="vehicleForm.get('chassi')?.errors?.['pattern']">
+            O chassi deve conter apenas letras e números
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Renavam</mat-label>
+          <input matInput formControlName="renavam" placeholder="11 dígitos numéricos" maxlength="11" required>
+          <mat-hint>{{ vehicleForm.get('renavam')?.value?.length || 0 }}/11 dígitos</mat-hint>
+          <mat-error *ngIf="vehicleForm.get('renavam')?.errors?.['required']">
+            O Renavam é obrigatório
+          </mat-error>
+          <mat-error
+            *ngIf="vehicleForm.get('renavam')?.errors?.['minlength'] || vehicleForm.get('renavam')?.errors?.['maxlength']">
+            O Renavam deve ter exatamente 11 dígitos
+          </mat-error>
+          <mat-error *ngIf="vehicleForm.get('renavam')?.errors?.['pattern']">
+            O Renavam deve conter apenas números
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+    </form>
+  </mat-card-content>
+
+  <mat-card-actions align="end">
+    <button mat-button type="button" routerLink="/vehicles" [disabled]="loading">
+      Cancelar
+    </button>
+
+    <button mat-raised-button color="primary" type="submit" (click)="onSubmit()"
+      [disabled]="vehicleForm.invalid || loading">
+      <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+      <span *ngIf="!loading">{{ isEditMode ? 'Atualizar' : 'Cadastrar' }}</span>
+      <span *ngIf="loading">{{ isEditMode ? 'Atualizando...' : 'Cadastrando...' }}</span>
+    </button>
+  </mat-card-actions>
+</mat-card>
+
+<!-- Preview do veículo -->
+<mat-card *ngIf="vehicleForm.valid" class="vehicle-preview">
+  <mat-card-header>
+    <mat-card-title>
+      <mat-icon>preview</mat-icon>
+      Pré-visualização
+    </mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+    <div class="preview-content">
+      <div class="vehicle-icon">
+        <mat-icon [class]="'vehicle-type-icon type-' + vehicleForm.get('tipo')?.value?.toLowerCase()">
+          {{ getTypeIcon(vehicleForm.get('tipo')?.value) }}
+        </mat-icon>
+      </div>
+
+      <div class="vehicle-details">
+        <h3>{{ vehicleForm.get('marca')?.value }} {{ vehicleForm.get('modelo')?.value }}</h3>
+        <div class="detail-row">
+          <span class="label">Tipo:</span>
+          <span>{{ getTypeLabel(vehicleForm.get('tipo')?.value) }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Placa:</span>
+          <code class="license-plate">{{ vehicleForm.get('placa')?.value }}</code>
+        </div>
+        <div class="detail-row">
+          <span class="label">Ano:</span>
+          <span>{{ vehicleForm.get('ano')?.value }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Cor:</span>
+          <span class="color-info">
+            <span class="color-circle" [style.background-color]="getColorHex(vehicleForm.get('cor')?.value)"></span>
+            {{ vehicleForm.get('cor')?.value }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

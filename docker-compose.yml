@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: garage-backend
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -f http://localhost:3000/api || exit 1']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - garage-network
+
+  frontend:
+    build:
+      context: ./frontend/garage-frontend
+      dockerfile: Dockerfile
+    container_name: garage-frontend
+    ports:
+      - '80:80'
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - garage-network
+
+  # For future database integration
+  # postgres:
+  #   image: postgres:15-alpine
+  #   container_name: garage-postgres
+  #   environment:
+  #     POSTGRES_DB: garage_db
+  #     POSTGRES_USER: garage_user
+  #     POSTGRES_PASSWORD: garage_password
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   networks:
+  #     - garage-network
+
+  # For future Redis integration (caching/sessions)
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: garage-redis
+  #   ports:
+  #     - "6379:6379"
+  #   networks:
+  #     - garage-network
+
+networks:
+  garage-network:
+    driver: bridge
+# volumes:
+#   postgres_data:

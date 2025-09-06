@@ -1,0 +1,155 @@
+<div class="header">
+  <h1>Lista de Veículos</h1>
+  <button mat-raised-button color="primary" routerLink="/vehicles/new">
+    <mat-icon>add</mat-icon>
+    Novo Veículo
+  </button>
+</div>
+
+<mat-card>
+  <!-- Filtros -->
+  <mat-card-header>
+    <mat-card-title>Filtros</mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+    <div class="filters">
+      <mat-form-field appearance="outline">
+        <mat-label>Buscar</mat-label>
+        <input matInput [(ngModel)]="searchTerm" (input)="onSearchChange()"
+          placeholder="Buscar por marca, modelo ou placa">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Tipo</mat-label>
+        <mat-select [(value)]="selectedType" (valueChange)="onFilterChange()">
+          <mat-option value="">Todos</mat-option>
+          <mat-option value="CARRO">Carro</mat-option>
+          <mat-option value="MOTO">Moto</mat-option>
+          <mat-option value="CAMINHAO">Caminhão</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Marca</mat-label>
+        <mat-select [(value)]="selectedBrand" (valueChange)="onFilterChange()">
+          <mat-option value="">Todas</mat-option>
+          <mat-option *ngFor="let brand of uniqueBrands" [value]="brand">
+            {{ brand }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <button mat-raised-button color="accent" (click)="clearFilters()">
+        <mat-icon>clear</mat-icon>
+        Limpar Filtros
+      </button>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+<!-- Loading -->
+<div *ngIf="loading" class="loading">
+  <mat-spinner></mat-spinner>
+  <p>Carregando veículos...</p>
+</div>
+
+<!-- Tabela de veículos -->
+<mat-card *ngIf="!loading">
+  <mat-card-header>
+    <mat-card-title>
+      Veículos Cadastrados ({{ filteredVehicles.length }})
+    </mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+    <div class="table-container">
+      <table mat-table [dataSource]="filteredVehicles" class="vehicles-table">
+
+        <!-- Coluna Tipo -->
+        <ng-container matColumnDef="tipo">
+          <th mat-header-cell *matHeaderCellDef> Tipo </th>
+          <td mat-cell *matCellDef="let vehicle">
+            <mat-icon [class]="'type-icon type-' + vehicle.tipo.toLowerCase()">
+              {{ getTypeIcon(vehicle.tipo) }}
+            </mat-icon>
+            {{ getTypeLabel(vehicle.tipo) }}
+          </td>
+        </ng-container>
+
+        <!-- Coluna Marca -->
+        <ng-container matColumnDef="marca">
+          <th mat-header-cell *matHeaderCellDef> Marca </th>
+          <td mat-cell *matCellDef="let vehicle"> {{ vehicle.marca }} </td>
+        </ng-container>
+
+        <!-- Coluna Modelo -->
+        <ng-container matColumnDef="modelo">
+          <th mat-header-cell *matHeaderCellDef> Modelo </th>
+          <td mat-cell *matCellDef="let vehicle"> {{ vehicle.modelo }} </td>
+        </ng-container>
+
+        <!-- Coluna Placa -->
+        <ng-container matColumnDef="placa">
+          <th mat-header-cell *matHeaderCellDef> Placa </th>
+          <td mat-cell *matCellDef="let vehicle">
+            <code class="license-plate">{{ vehicle.placa }}</code>
+          </td>
+        </ng-container>
+
+        <!-- Coluna Ano -->
+        <ng-container matColumnDef="ano">
+          <th mat-header-cell *matHeaderCellDef> Ano </th>
+          <td mat-cell *matCellDef="let vehicle"> {{ vehicle.ano }} </td>
+        </ng-container>
+
+        <!-- Coluna Cor -->
+        <ng-container matColumnDef="cor">
+          <th mat-header-cell *matHeaderCellDef> Cor </th>
+          <td mat-cell *matCellDef="let vehicle">
+            <span class="color-indicator" [style.background-color]="getColorHex(vehicle.cor)"></span>
+            {{ vehicle.cor }}
+          </td>
+        </ng-container>
+
+        <!-- Coluna Ações -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef> Ações </th>
+          <td mat-cell *matCellDef="let vehicle">
+            <button mat-icon-button color="primary" [routerLink]="['/vehicles', vehicle.id]" matTooltip="Ver detalhes">
+              <mat-icon>visibility</mat-icon>
+            </button>
+
+            <button mat-icon-button color="accent" [routerLink]="['/vehicles', vehicle.id, 'edit']" matTooltip="Editar">
+              <mat-icon>edit</mat-icon>
+            </button>
+
+            <button mat-icon-button color="warn" (click)="deleteVehicle(vehicle)" matTooltip="Excluir">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="vehicle-row" (click)="viewVehicle(row)">
+        </tr>
+      </table>
+    </div>
+
+    <!-- Mensagem quando não há veículos -->
+    <div *ngIf="filteredVehicles.length === 0" class="no-data">
+      <mat-icon>directions_car_filled</mat-icon>
+      <h3>Nenhum veículo encontrado</h3>
+      <p *ngIf="searchTerm || selectedType || selectedBrand">
+        Tente ajustar os filtros ou
+        <button mat-button color="primary" (click)="clearFilters()">limpar filtros</button>
+      </p>
+      <p *ngIf="!searchTerm && !selectedType && !selectedBrand">
+        <button mat-raised-button color="primary" routerLink="/vehicles/new">
+          Cadastrar o primeiro veículo
+        </button>
+      </p>
+    </div>
+  </mat-card-content>
+</mat-card>
